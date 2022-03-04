@@ -8,7 +8,7 @@ import type { AnyPreloadedQuery } from './types';
 
 export function getWiredProps(
   pageProps: AppProps['pageProps'],
-  initialPreloadedQuery: AnyPreloadedQuery | null
+  initialPreloadedQuery: { [key: string]: AnyPreloadedQuery } | null
 ): Partial<WiredProps> {
   const serverContext = getWiredServerContext(
     pageProps.__wired__server__context
@@ -19,23 +19,29 @@ export function getWiredProps(
   );
 
   const CSN = clientContext != null;
-  const preloadedQueries =
-    clientContext?.preloadedQueries ??
-    serverContext?.preloadedQueries ??
-      {preloadedQuery: initialPreloadedQuery!};
+  const preloadedQueries = clientContext?.preloadedQueries ??
+    serverContext?.preloadedQueries ?? {
+      preloadedQuery: initialPreloadedQuery!,
+    };
 
   return { CSN, ...preloadedQueries };
 }
 
 export function getInitialPreloadedQuery(opts: {
   createClientEnvironment: () => Environment;
-}): AnyPreloadedQuery | null {
+}): { [key: string]: AnyPreloadedQuery } | null {
   if (typeof window === 'undefined') return null;
   const serializedState = getWiredSerializedState();
-  if (serializedState == null || serializedState.query == null) return null;
+  if (serializedState == null || serializedState.queries == null) return null;
 
   const env = opts.createClientEnvironment()!;
-  return loadQuery(env, serializedState.query, serializedState.variables, {
-    fetchPolicy: 'store-or-network',
-  });
+
+  return Object.fromEntries(
+    Object.entries(serializedState.queries).map(([key, query]) => [
+      key,
+      loadQuery(env, query, serializedState.variables[key], {
+        fetchPolicy: 'store-or-network',
+      }),
+    ])
+  );
 }

@@ -1,11 +1,12 @@
 `relay-nextjs` acts as a bridge between Next.js and Relay.
 
-`relay-nextjs` wraps page components, a GraphQL query, and some helper methods to
-automatically hook up data fetching using Relay. On initial load a Relay
+`relay-nextjs` wraps page components, a GraphQL query, and some helper methods
+to automatically hook up data fetching using Relay. On initial load a Relay
 environment is created, the data is fetched server-side, the page is rendered,
 and resulting state is serialized as a script tag. On boot in the client a new
 Relay environment and preloaded query are created using that serialized state.
-Data is fetched using the client-side Relay environment on subsequent navigations.
+Data is fetched using the client-side Relay environment on subsequent
+navigations.
 
 ## Getting Started
 
@@ -15,14 +16,22 @@ Install using npm or your other favorite package manager:
 $ npm install relay-nextjs
 ```
 
-`relay-nextjs` must be configured in both a custom `_document` and `_app` to properly
-intercept and handle routing.
+`relay-nextjs` must be configured in both a custom `_document` and `_app` to
+properly intercept and handle routing.
 
 ### Setting up the Relay Environment
 
-For basic information about the Relay environment please see the [Relay docs](https://relay.dev/docs/getting-started/step-by-step-guide/#42-configure-relay-runtime).
+For basic information about the Relay environment please see the
+[Relay docs](https://relay.dev/docs/getting-started/step-by-step-guide/#42-configure-relay-runtime).
 
-`relay-nextjs` was designed with both client-side and server-side rendering in mind. As such it needs to be able to use either a client-side or server-side Relay environment. The library knows how to handle which environment to use, but we have to tell it how to create these environments. For this we will define two functions: `getClientEnvironment` and `createServerEnvironment`. Note the distinction — on the client only one environment is ever created because there is only one app, but on the server we must create an environment per-render to ensure the cache is not shared between requests.
+`relay-nextjs` was designed with both client-side and server-side rendering in
+mind. As such it needs to be able to use either a client-side or server-side
+Relay environment. The library knows how to handle which environment to use, but
+we have to tell it how to create these environments. For this we will define two
+functions: `getClientEnvironment` and `createServerEnvironment`. Note the
+distinction — on the client only one environment is ever created because there
+is only one app, but on the server we must create an environment per-render to
+ensure the cache is not shared between requests.
 
 First let’s define `getClientEnvironment`:
 
@@ -107,7 +116,8 @@ export function createServerEnvironment() {
 }
 ```
 
-Note in the example server environment we’re executing against a local schema but you may fetch from a remote API as well.
+Note in the example server environment we’re executing against a local schema
+but you may fetch from a remote API as well.
 
 ### Configuring `_document`
 
@@ -125,9 +135,9 @@ class MyDocument extends Document<MyDocumentProps> {
 
     const renderPage = ctx.renderPage;
     ctx.renderPage = () =>
-    renderPage({
-      enhanceApp: (App) => relayDocument.enhance(App),
-    });
+      renderPage({
+        enhanceApp: (App) => relayDocument.enhance(App),
+      });
 
     const initialProps = await Document.getInitialProps(ctx);
 
