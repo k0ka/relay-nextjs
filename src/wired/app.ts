@@ -19,12 +19,12 @@ export function getWiredProps(
   );
 
   const CSN = clientContext != null;
-  const preloadedQuery =
-    clientContext?.preloadedQuery ??
-    serverContext?.preloadedQuery ??
-    initialPreloadedQuery!;
+  const preloadedQueries =
+    clientContext?.preloadedQueries ??
+    serverContext?.preloadedQueries ??
+      {preloadedQuery: initialPreloadedQuery!};
 
-  return { CSN, preloadedQuery };
+  return { CSN, ...preloadedQueries };
 }
 
 export function getInitialPreloadedQuery(opts: {
