@@ -103,7 +103,7 @@ export function Wire<
     const hooks = Object.entries(queries).map(([key, query]) => {
       const [queryReference, loadQuery, disposeQuery] = useQueryLoader(
         query,
-        props.preloadedQuery
+        props[key]
       );
 
       return {
@@ -125,10 +125,12 @@ export function Wire<
           );
     }, [router]);
 
-    useEffect(() => {
-      hooks.forEach(({ key, loadQuery }) => loadQuery(queryVariables[key]));
-      return () => hooks.forEach(({ key, disposeQuery }) => disposeQuery());
-    }, [hooks, queryVariables]);
+    hooks.forEach(({key, loadQuery, disposeQuery}) => {
+      useEffect(() => {
+        loadQuery(queryVariables[key]);
+        return disposeQuery;
+      }, [loadQuery, disposeQuery, queryVariables[key]]);
+    })
 
     const haveQueryVarsChanged = useHaveQueryVariablesChanges(queryVariables);
 
@@ -145,7 +147,7 @@ export function Wire<
           <Suspense fallback={opts.fallback ?? 'Loading...'}>
             <Component
               {...props}
-              {...hooks.map(({ queryReference }) => queryReference)}
+              {...Object.fromEntries(hooks.map(({ key, queryReference }) => [key, queryReference]))}
             />
           </Suspense>
         </WiredErrorBoundary>
@@ -154,7 +156,7 @@ export function Wire<
       return (
         <Component
           {...props}
-          {...hooks.map(({ queryReference }) => queryReference)}
+          {...Object.fromEntries(hooks.map(({ key, queryReference }) => [key, queryReference]))}
         />
       );
     }
@@ -278,7 +280,7 @@ function getClientInitialProps<Queries extends OperationTypes, ClientSideProps>(
     ])
   );
 
-  const context = createWiredClientContext(preloadedQueries);
+  const context = createWiredClientContext({preloadedQueries});
 
   return {
     ...clientSideProps,

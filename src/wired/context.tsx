@@ -32,7 +32,7 @@ export function getWiredServerContext(
 }
 
 export interface WiredClientContext {
-  [key: string]: AnyPreloadedQuery;
+  preloadedQueries: { [key: string]: AnyPreloadedQuery };
 }
 
 export function createWiredClientContext(value: WiredClientContext) {

@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app';
 import type { Environment } from 'react-relay/hooks';
 import { loadQuery } from 'react-relay/hooks';
+import { IEnvironment } from 'relay-runtime';
 import type { WiredProps } from './component';
 import { getWiredClientContext, getWiredServerContext } from './context';
 import { getWiredSerializedState } from './serialized_state';
@@ -9,7 +10,7 @@ import type { AnyPreloadedQuery } from './types';
 export function getWiredProps(
   pageProps: AppProps['pageProps'],
   initialPreloadedQuery: { [key: string]: AnyPreloadedQuery } | null
-): Partial<WiredProps> {
+): [Partial<WiredProps>, IEnvironment?] {
   const serverContext = getWiredServerContext(
     pageProps.__wired__server__context
   );
@@ -19,12 +20,11 @@ export function getWiredProps(
   );
 
   const CSN = clientContext != null;
-  const preloadedQueries = clientContext?.preloadedQueries ??
-    serverContext?.preloadedQueries ?? {
-      preloadedQuery: initialPreloadedQuery!,
-    };
+  const preloadedQueries = clientContext?.preloadedQueries
+      ?? serverContext?.preloadedQueries
+      ?? initialPreloadedQuery!;
 
-  return { CSN, ...preloadedQueries };
+  return [{ CSN, ...preloadedQueries }, serverContext?.environment];
 }
 
 export function getInitialPreloadedQuery(opts: {
